@@ -1,0 +1,94 @@
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WebRTC Demo</title>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Syne+Mono&display=swap');
+
+      html, body {
+        padding: 0;
+        margin: 0;
+        height: 100%; 
+      }
+
+      .primary-video {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .secondary-video {
+        position: absolute;
+        max-width: 30%;
+        width: 30%;
+        margin: 16px;
+        border-radius: 16px;
+      }
+
+      .button-container {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 10px;
+      }
+
+      .control-button {
+      background-color:transparent; 
+      color: #fff; 
+      padding: 10px;
+      font-size: 12px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      display: flex;
+      align-items: center; 
+      justify-content: center; 
+    }
+
+    .control-button:disabled {
+      background-color: transparent;
+      cursor: not-allowed;
+    }
+
+   
+
+
+    /* Adjust the size of images */
+    .control-button img {
+      width: 50px; 
+      height: 50px; 
+      margin-right: 5px; 
+    }
+     
+
+   
+    </style>
+  </head>
+  <body>
+    <div class="video-container">
+      <video class="primary-video" autoplay muted id="remoteVideo"></video>
+      <video class="secondary-video" autoplay muted id="webcamVideo"></video>
+      <div class="button-container">
+       
+        <button class="control-button" id="swapCameraButton">
+          <img src="./icons/switchcamera.png" alt="Swap Camera">
+        </button>
+        <button class="control-button" id="hangupButton" >
+          <img src="./icons/phone-call-end.png" alt="Hangup">
+        </button>
+        <button class="control-button" id="muteMicButton" >
+          <img src="./icons/unmuted.png" alt="Mute Mic">
+        </button>
+    
+
+      </div>
+    </div>
+    <script type="module" src="/main.js"></script>
+  </body>
+  </html>
