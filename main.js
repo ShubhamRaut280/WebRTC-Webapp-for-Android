@@ -5,6 +5,7 @@ import 'firebase/firestore';
 import "firebase/database";
 
 
+
 const firebaseConfig = {
   apiKey: "AIzaSyD2-ZqeVqJmDEWS05I8LUzmFhvmZaYroHg",
   authDomain: "sm-android-exp.firebaseapp.com",
@@ -47,27 +48,19 @@ const buttonContainer = document.querySelector('.button-container');
 
 
 // 1. Setup media sources
-startCam();
 
 var connId = Android.getConnId();
 var guard = Android.getUserUid();
 
 
-Android.showToast("Data received:  guard : "+ guard+" connection id : "+ connId  )
+Android.showToast("Data received:  guard : " + guard + " connection id : " + connId)
 
-if (connId === null || connId === undefined || connId === "") 
-{
-  createOffer(guard);
-  // Android.showToast("going to create offer")
-}
-else
-{
-  answerCall(connId);
-}
+
+startCam(connId, guard)
 
 
 
-async function  startCam()  {
+async function startCam(connId, guard) {
   localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
   remoteStream = new MediaStream();
 
@@ -86,6 +79,15 @@ async function  startCam()  {
   webcamVideo.srcObject = localStream;
   remoteVideo.srcObject = remoteStream;
 
+
+  if (connId === null || connId === undefined || connId === "") {
+    createOffer(guard);
+    // Android.showToast("going to create offer")
+  }
+  else {
+    answerCall(connId);
+  }
+
 };
 
 // 2. Create an offer
@@ -98,7 +100,7 @@ async function createOffer(userId) {
   const answerCandidates = callDoc.collection('answerCandidates');
 
 
-  Android.showToast("Offer created here is connection id : "+ callDoc.id)
+  Android.showToast("Offer created here is connection id : " + callDoc.id)
 
 
   // Get candidates for caller, save to db
@@ -118,12 +120,12 @@ async function createOffer(userId) {
   await callDoc.set({ offer });
 
   const database = firebase.database();
-  
- // Store connection ID in Realtime Database
-database.ref('rooms/' + userId).update({
-  connectionid: callDoc.id,
-  isactive: true
-});
+
+  // Store connection ID in Realtime Database
+  database.ref('callRequestFromGuard/' + userId).update({
+    connectionId: callDoc.id,
+    isHangout: false
+  });
 
   Android.showToast("Offer created")
 
@@ -151,8 +153,9 @@ database.ref('rooms/' + userId).update({
 
 
 // 3. Answer the call with the unique ID
-async function answerCall (connectionId)  {
-  const callId = connectionId;
+async function answerCall(connId) {
+  const callId = connId;
+  Android.showToast("connection id from js : " + connId)
   const callDoc = firestore.collection('calls').doc(callId);
   const answerCandidates = callDoc.collection('answerCandidates');
   const offerCandidates = callDoc.collection('offerCandidates');
@@ -160,22 +163,22 @@ async function answerCall (connectionId)  {
   pc.onicecandidate = (event) => {
     event.candidate && answerCandidates.add(event.candidate.toJSON());
   };
- 
+
   const callData = (await callDoc.get()).data();
- 
+
   const offerDescription = callData.offer;
   await pc.setRemoteDescription(new RTCSessionDescription(offerDescription));
- 
+
   const answerDescription = await pc.createAnswer();
   await pc.setLocalDescription(answerDescription);
- 
+
   const answer = {
     type: answerDescription.type,
     sdp: answerDescription.sdp,
   };
- 
+
   await callDoc.update({ answer });
- 
+
   offerCandidates.onSnapshot((snapshot) => {
     snapshot.docChanges().forEach((change) => {
       console.log(change);
@@ -192,8 +195,22 @@ hangupButton.addEventListener('click', hangup);
 swapCameraButton.addEventListener('click', swapCamera);
 muteMicButton.addEventListener('click', toggleMuteMic);
 
+
 // Function to hang up the call
 function hangup() {
+  Android.showToast("form hangup : " + guard)
+
+
+  //  hangup field in realtime db
+
+  const database = firebase.database();
+
+  // Store connection ID in Realtime Database
+  database.ref('callRequestFromGuard/' + guard).update({
+    isHangout: true
+  });
+
+
   // Remove all elements
   remoteVideo.srcObject = null;
   webcamVideo.srcObject = null;
@@ -204,7 +221,7 @@ function hangup() {
   const callCompletedText = document.createElement('h2');
   callCompletedText.textContent = 'Call ended you can go back';
   callCompletedText.style.fontSize = '24px';
-  callCompletedText.style.color = '#3498db'; // Blue color, you can change it
+  callCompletedText.style.color = '#3498db';
   callCompletedText.style.textAlign = 'center';
   videoContainer.appendChild(callCompletedText);
 
@@ -217,9 +234,7 @@ function hangup() {
 
 
   Android.showToast('call ended')
-  window.Android.onHangup();
-
-  }
+}
 
 // Function to swap the camera
 async function swapCamera() {
@@ -272,7 +287,7 @@ function toggleMuteMic() {
   changeMicImage();
 
 
-// toggle image
+  // toggle image
   console.log('Microphone toggled');
 }
 
@@ -287,22 +302,6 @@ function changeMicImage() {
     muteMicButton.innerHTML = '<img src="./icons/unmuted.png" />';
   }
 }
-
-
-
-function hideAllButtons() {
-  console.log('hideAllButtons function called');
-  var buttonContainer = document.querySelector('.button-container');
-  if (buttonContainer) {
-      var buttons = buttonContainer.querySelectorAll('.control-button');
-      buttons.forEach(function(button) {
-          button.style.display = 'none';
-      });
-  }
-  Android.showToast("buttons hidden");
-}
-
-
 
 
 
