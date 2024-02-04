@@ -53,7 +53,7 @@ var connId = Android.getConnId();
 var guard = Android.getUserUid();
 
 
-Android.showToast("Data received:  guard : " + guard + " connection id : " + connId)
+// Android.showToast("Data received:  guard : " + guard + " connection id : " + connId)
 
 
 startCam(connId, guard)
@@ -100,7 +100,7 @@ async function createOffer(userId) {
   const answerCandidates = callDoc.collection('answerCandidates');
 
 
-  Android.showToast("Offer created here is connection id : " + callDoc.id)
+  // Android.showToast("Offer created here is connection id : " + callDoc.id)
 
 
   // Get candidates for caller, save to db
@@ -127,7 +127,7 @@ async function createOffer(userId) {
     isHangout: false
   });
 
-  Android.showToast("Offer created")
+  // Android.showToast("Offer created")
 
   // Listen for remote answer
   callDoc.onSnapshot((snapshot) => {
@@ -155,7 +155,7 @@ async function createOffer(userId) {
 // 3. Answer the call with the unique ID
 async function answerCall(connId) {
   const callId = connId;
-  Android.showToast("connection id from js : " + connId)
+  // Android.showToast("connection id from js : " + connId)
   const callDoc = firestore.collection('calls').doc(callId);
   const answerCandidates = callDoc.collection('answerCandidates');
   const offerCandidates = callDoc.collection('offerCandidates');
@@ -198,11 +198,8 @@ muteMicButton.addEventListener('click', toggleMuteMic);
 
 // Function to hang up the call
 function hangup() {
-  Android.showToast("form hangup : " + guard)
-
-
+  // Android.showToast("form hangup : " + guard)
   //  hangup field in realtime db
-
   const database = firebase.database();
 
   // Store connection ID in Realtime Database
@@ -229,7 +226,7 @@ function hangup() {
   hangupButton.disabled = true;
   swapCameraButton.disabled = true;
   muteMicButton.disabled = true;
-  disableCameraButton.disabled = true;
+  // disableCameraButton.disabled = true;
   buttonContainer.style.display = 'none';
 
 
